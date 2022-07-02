@@ -1,4 +1,4 @@
-# stravaActivitiesExporter
+# Strava Activities Exporter
 
 <h1 align="center">
 <br>
@@ -9,7 +9,7 @@ Strava Activities Exporter
 </h1>
 
 
-<p align="center">This script enable user to export all activities in Strava</p>
+<p align="center">This script enable user to export to cv/excel all activities in Strava</p>
 
 
 [//]: # "Add your gifs/images here:"
@@ -42,6 +42,26 @@ var activities=[],totalActivites=document.querySelector("body > div.page.contain
 <hr />
 
 
-[//]: # "Add the features of your project here:"
-Important
-Maybe you will have to give the permission to enable download
+
+https://user-images.githubusercontent.com/25828420/177010111-b852bff8-80ae-4baf-9e78-0cb5f4553f14.mp4
+
+## Important
+
+It's possible to be necessary to give  permission to enable download
+
+
+<hr />
+
+## Split text into different columns
+
+Open the Excel spreadsheet where you want to save the data and click the Data tab.
+1. Select the cell or column that contains the text you want to split.
+2. Select Data > Text to Columns.
+3. In the Convert Text to Columns Wizard, select Delimited > Next.
+4. Select the Delimiters for your data. In this case, 'comma'.
+5. Select Next.
+6. Select the Destination in your worksheet which is where you want the split data to appear.
+7. Select Finish.
+
+[screen-recorder-sat-jul-02-2022-14-25-15.webm](https://user-images.githubusercontent.com/25828420/177010346-e20c7eb4-0617-4f8b-9778-d46b08010323.webm)
+
