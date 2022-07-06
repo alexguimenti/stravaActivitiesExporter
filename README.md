@@ -9,7 +9,7 @@ Strava Activities Exporter
 </h1>
 
 
-<p align="center">This script enable user to export to cv/excel all activities in Strava</p>
+<p align="center">This script enable user to export to csv/excel all activities in Strava</p>
 
 
 [//]: # "Add your gifs/images here:"
