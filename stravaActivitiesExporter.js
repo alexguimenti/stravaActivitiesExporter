@@ -7,6 +7,12 @@ var totalPages = Math.floor(totalActivites / 20 + 1);
 var currentPage = 1;
 var done = 0;
 
+// Function to remove accents only from letters, keeping special characters like "/" for dates
+function removeAccentsFromLetters(text) {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents from letters
+               .replace(/([^\w\s\/:.-])/gi, ''); // Remove unwanted punctuation but keep dates and special chars
+}
+
 // Function to convert an array of objects to CSV, ensuring no empty fields cause issues
 function convertToCSV(arr) {
     if (arr.length === 0) return ''; // Avoid processing an empty array
@@ -16,8 +22,9 @@ function convertToCSV(arr) {
 
     const values = arr.map(activity => {
         return headers.map(header => {
-            const value = activity[header] || ''; // Replace missing values with empty strings
-            return value.toString().replace(',', '.'); // Handle commas in the values
+            let value = activity[header] || ''; // Replace missing values with empty strings
+            value = value.toString().replace(',', '.'); // Handle commas in the values
+            return removeAccentsFromLetters(value);  // Remove accents only from letters, keeping dates and other symbols
         }).join(',');
     }).join('\n');
 
@@ -30,6 +37,9 @@ while (currentPage <= totalPages) {
         url: `https://www.strava.com/athlete/training_activities?page=${currentPage}&per_page=20`,
         dataType: "json",
         method: "get",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8" // Force UTF-8 encoding
+        },
         success: function (data) {
             try {
                 // Add each activity to the activities array
