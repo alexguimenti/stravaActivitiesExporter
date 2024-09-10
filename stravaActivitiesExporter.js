@@ -1,85 +1,74 @@
-// Inicializa o array para armazenar atividades
+// Initialize the array to store activities
 var activities = [];
 
-// Obtém o número total de atividades a partir do DOM e calcula o número de páginas
+// Get the total number of activities from the DOM and calculate the number of pages
 var totalActivites = document.querySelector("body > div.page.container > form > div.h3.results-summary > div").textContent.replace('.', '').split(' ')[0];
 var totalPages = Math.floor(totalActivites / 20 + 1);
 var currentPage = 1;
 var done = 0;
 
-// Função para converter um array de objetos para CSV
+// Function to convert an array of objects to CSV, ensuring no empty fields cause issues
 function convertToCSV(arr) {
-    const array = [Object.keys(arr[0])].concat(arr);
-    return array.map(it => {
-        return Object.values(it).toString();
+    if (arr.length === 0) return ''; // Avoid processing an empty array
+
+    const headers = Object.keys(arr[0]);
+    const headerLine = headers.join(',');
+
+    const values = arr.map(activity => {
+        return headers.map(header => {
+            const value = activity[header] || ''; // Replace missing values with empty strings
+            return value.toString().replace(',', '.'); // Handle commas in the values
+        }).join(',');
     }).join('\n');
+
+    return headerLine + '\n' + values;
 }
 
-// Loop para percorrer todas as páginas e coletar atividades
+// Loop through all pages and collect activities
 while (currentPage <= totalPages) {
     jQuery.ajax({
         url: `https://www.strava.com/athlete/training_activities?page=${currentPage}&per_page=20`,
         dataType: "json",
         method: "get",
         success: function (data) {
-            // Adiciona cada atividade ao array de atividades
-            for (var activity in data.models) {
-                activities.push(data.models[activity]);
-            }
-            done++;
-            console.log(Math.round(done * 100 / totalPages) + '%');
-
-            // Exibe no console cada cabeçalho e seu valor correspondente para cada atividade
-            activities.forEach((activity, index) => {
-                console.log(`Atividade ${index + 1}:`);
-                Object.entries(activity).forEach(([key, value]) => {
-                    console.log(`  ${key}: ${value}`);
-                });
-            });
-
-            // Se todas as páginas foram processadas
-            if (done >= totalPages) {
-                console.log('\nDONE!!!');
-                console.log("\nIf download didn't start, check browser window to enable permission");
-
-                // Verifica se existem atividades coletadas
-                if (activities.length > 0) {
-                    // Obtém os cabeçalhos e garante que cada atividade tenha valores correspondentes
-                    let headers = Object.keys(activities[0]);
-                    let header = headers.join(',');
-                    let values = activities.map(activity => {
-                        // Substitui a vírgula por ponto no campo start_date
-                        if (activity['start_date']) {
-                            activity['start_date'] = activity['start_date'].replace(',', '.');
-                        }
-                        // Substitui a vírgula por ponto no campo distance
-                        if (activity['distance']) {
-                            activity['distance'] = activity['distance'].replace(',', '.');
-                        }
-                        // Substitui a vírgula por ponto no campo description
-                        if (activity['description']) {
-                            activity['description'] = activity['description'].replace(',', '.');
-                        }
-                        // Substitui a vírgula por ponto no campo name
-                        if (activity['name']) {
-                            activity['name'] = activity['name'].replace(',', '.');
-                        }
-                        // Substitui a vírgula por ponto no campo twitter_msg
-                        if (activity['twitter_msg']) {
-                            activity['twitter_msg'] = activity['twitter_msg'].replace(',', '.');
-                        }
-                        return headers.map(header => activity[header] || '').join(',');
-                    }).join('\n');
-
-                    // Gera o CSV e inicia o download
-                    let csv = header + '\n' + values;
-                    var hiddenElement = document.createElement('a');
-                    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-                    hiddenElement.target = '_blank';
-                    hiddenElement.download = 'activities.csv';
-                    hiddenElement.click();
+            try {
+                // Add each activity to the activities array
+                for (var activity in data.models) {
+                    activities.push(data.models[activity]);
                 }
+                done++;
+                console.log(Math.round(done * 100 / totalPages) + '%');
+
+                // Display each header and its corresponding value for each activity in the console
+                activities.forEach((activity, index) => {
+                    //console.log(`Activity ${index + 1}:`);
+                    Object.entries(activity).forEach(([key, value]) => {
+                        //console.log(`  ${key}: ${value}`);
+                    });
+                });
+
+                // If all pages have been processed
+                if (done >= totalPages) {
+                    console.log('\nDONE!!!');
+                    console.log("\nIf download didn't start, check browser window to enable permission");
+
+                    // Check if there are any activities collected
+                    if (activities.length > 0) {
+                        // Convert activities to CSV and trigger download
+                        let csv = convertToCSV(activities);
+                        var hiddenElement = document.createElement('a');
+                        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                        hiddenElement.target = '_blank';
+                        hiddenElement.download = 'activities.csv';
+                        hiddenElement.click();
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing data:', error);
             }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error(`Error on page ${currentPage}: ${textStatus}, ${errorThrown}`);
         }
     });
     currentPage++;
